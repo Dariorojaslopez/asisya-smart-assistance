@@ -48,8 +48,7 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend/provider-ui
-          npm run build
-
+          npx vite build
       # -----------------------------
       # DOCKER
       # -----------------------------
