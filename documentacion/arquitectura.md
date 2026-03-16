@@ -1,271 +1,192 @@
 # Arquitectura del Sistema
 
-## 1. Introducción
+## 1. Visión General
 
-El sistema propuesto permite la **asignación inteligente de proveedores de asistencia vehicular** (grúa, cerrajería, batería) cuando un usuario realiza una solicitud desde una aplicación móvil.
+El sistema **Provider Optimizer** es una plataforma diseñada para seleccionar el proveedor de asistencia más adecuado en función de la ubicación del cliente y el tipo de asistencia requerida.
 
-El objetivo del sistema es identificar el proveedor más adecuado considerando factores como:
+La solución implementa una arquitectura moderna basada en microservicios ligeros y separación de responsabilidades entre frontend, backend y base de datos.
 
-- Distancia al cliente
-- Tiempo estimado de llegada (ETA)
-- Disponibilidad del proveedor
-- Calificación del proveedor
+El sistema permite:
 
-La solución debe ser **escalable, resiliente y segura**, permitiendo procesar múltiples solicitudes simultáneamente y ofreciendo seguimiento en tiempo real al usuario.
-
----
-
-# 2. Flujo general del sistema
-
-El flujo funcional del sistema es el siguiente:
-
-1. El usuario solicita una asistencia desde la aplicación móvil.
-2. La solicitud es enviada al API Gateway.
-3. El servicio de solicitudes registra el caso.
-4. Se obtiene la ubicación del cliente.
-5. Se consultan proveedores disponibles.
-6. Se ejecuta el algoritmo de optimización para seleccionar el proveedor más adecuado.
-7. Se envía una notificación al proveedor seleccionado.
-8. Se registra el estado del servicio.
-9. El usuario puede visualizar el seguimiento en tiempo real.
+- Autenticación mediante JWT
+- Selección de tipo de asistencia
+- Ingreso de ubicación manual o mediante mapa
+- Optimización de proveedores basada en proximidad
+- Visualización de resultados en tabla y mapa interactivo
 
 ---
 
-# 3. Estilo de arquitectura
+# 2. Arquitectura General
 
-La solución sigue los siguientes principios arquitectónicos:
+La arquitectura se compone de tres capas principales:
+React Frontend
+      │
+      │ HTTP REST API
+      ▼
+ASP.NET Core API
+      │
+      │ Entity Framework
+      ▼
+PostgreSQL Database
 
-- Arquitectura de microservicios
-- Domain Driven Design (DDD)
-- Clean Architecture
-- Comunicación basada en eventos
-- Procesamiento asíncrono
-- Escalabilidad horizontal
+### Frontend
 
-Esto permite que cada componente del sistema evolucione de manera independiente y soporte altos volúmenes de tráfico.
+Tecnología:
+
+- React
+- React Router
+- Axios
+- Leaflet (mapa interactivo)
+
+Responsabilidades:
+
+- Interfaz de usuario
+- Selección de ubicación
+- Consumo de API REST
+- Visualización de resultados
+- Gestión de autenticación JWT
 
 ---
 
-# 4. Arquitectura en la nube (AWS)
+### Backend
 
-La solución se diseña sobre infraestructura AWS utilizando servicios administrados para garantizar alta disponibilidad, seguridad y escalabilidad.
+Tecnología:
 
-## Componentes principales
+- ASP.NET Core (.NET 8)
+- Entity Framework Core
+- JWT Authentication
 
-### Cliente
+Responsabilidades:
 
-- Aplicación móvil
-- Aplicación web (React)
+- Autenticación de usuarios
+- Gestión de usuarios (CRUD)
+- Catálogo de tipos de asistencia
+- Optimización de proveedores
+- Exposición de API REST
 
-### CDN
-
-AWS CloudFront se utiliza para distribuir contenido estático del frontend.
-
-### Frontend Hosting
-
-El frontend es desplegado en:
-
-- AWS S3
-
-### API Gateway
-
-AWS API Gateway expone los servicios backend y gestiona:
-
-- autenticación
-- control de acceso
-- limitación de tráfico (rate limiting)
-
-### Autenticación
-
-El sistema utiliza autenticación basada en:
-
-- JWT
-- OAuth2
-
-Los tokens se validan en el API Gateway antes de acceder a los microservicios.
-
-### Microservicios
-
-Los microservicios se ejecutan en contenedores usando:
-
-- AWS ECS Fargate
-
-Cada microservicio es independiente y se comunica mediante eventos.
-
-### Broker de Mensajes
-
-Para comunicación asíncrona entre servicios se utiliza:
-
-- AWS SQS
-
-Esto permite desacoplar los servicios y mejorar la resiliencia.
+---
 
 ### Base de Datos
 
-El sistema utiliza:
+Motor:
 
-- AWS RDS PostgreSQL
+PostgreSQL
 
-para almacenamiento transaccional.
+Tablas principales:
 
-### Cache
+- Users
+- Providers
+- AssistanceTypes
 
-Para optimizar consultas frecuentes se utiliza:
+Responsabilidades:
 
-- AWS ElastiCache Redis
-
-### Observabilidad
-
-Para monitoreo y registro de eventos se utilizan:
-
-- AWS CloudWatch
-- métricas
-- logs
-- alertas
-
-### Seguridad
-
-La plataforma implementa controles de seguridad mediante:
-
-- AWS IAM Roles
-- AWS WAF
-- AWS Secrets Manager
-- Auditoría de accesos
+- Persistencia de usuarios
+- Persistencia de proveedores
+- Catálogo de asistencias
 
 ---
 
-# 5. Microservicios del sistema
+# 3. Flujo del Sistema
 
-El sistema se compone de los siguientes microservicios principales:
+El flujo principal del sistema es el siguiente:
 
-## AssistanceRequestService
-
-Responsable de gestionar las solicitudes de asistencia generadas por los usuarios.
-
-Funciones:
-
-- crear solicitudes
-- actualizar estado de asistencia
-- almacenar información del caso
-
-Entidad principal:
-
-AssistanceRequest
-
-Eventos generados:
-
-- AssistanceRequested
-- AssistanceAssigned
+1. El usuario inicia sesión mediante autenticación JWT.
+2. El usuario selecciona el tipo de asistencia.
+3. El usuario define la ubicación manualmente o mediante el mapa.
+4. El frontend invoca el endpoint de optimización.
+5. El backend calcula el proveedor óptimo.
+6. Los resultados se muestran en tabla y en el mapa.
 
 ---
 
-## ProviderOptimizerService
+# 4. Arquitectura Backend
 
-Responsable de seleccionar el proveedor óptimo para atender la solicitud.
+El backend sigue principios de **Clean Architecture**, separando las responsabilidades en diferentes capas:
+Controllers
+    │
+Services
+    │
+Domain
+    │
+Infrastructure
 
-El algoritmo considera:
+### Controllers
 
-- distancia
-- tiempo estimado de llegada (ETA)
-- disponibilidad
-- calificación del proveedor
+Exponen los endpoints REST.
 
-Este microservicio es el componente crítico del sistema.
+Ejemplo:
 
-Eventos consumidos:
-
-- AssistanceRequested
-
-Eventos generados:
-
-- ProviderAssigned
-
----
-
-## LocationService
-
-Encargado de obtener y procesar información geográfica.
-
-Funciones:
-
-- cálculo de distancia
-- cálculo de ETA
-- geolocalización
-
-Puede integrarse con servicios externos como Google Maps.
+- AuthController
+- ProvidersController
+- UsersController
+- CatalogController
 
 ---
 
-## NotificationService
+### Services
 
-Encargado de enviar notificaciones a:
+Contienen la lógica de negocio:
 
-- proveedores
-- usuarios
-
-Canales de comunicación:
-
-- notificaciones push
-- SMS
-- correo electrónico
-
-Eventos consumidos:
-
-- ProviderAssigned
+- Optimización de proveedores
+- Validaciones
+- Transformación de datos
 
 ---
 
-# 6. Comunicación entre servicios
+### Domain
 
-La comunicación entre microservicios sigue dos patrones:
+Define entidades del sistema:
 
-### Comunicación síncrona
-
-A través de APIs REST expuestas mediante API Gateway.
-
-### Comunicación asíncrona
-
-A través de eventos enviados mediante SQS.
-
-Ejemplo de flujo de eventos:
-
-AssistanceRequested → ProviderOptimizerService  
-ProviderAssigned → NotificationService
+- User
+- Provider
+- AssistanceType
 
 ---
 
-# 7. Estrategia de escalabilidad
+### Infrastructure
 
-La arquitectura permite escalar automáticamente mediante:
+Responsable de:
 
-- Auto Scaling en ECS
-- Procesamiento asíncrono mediante SQS
-- Balanceadores de carga
-- Cache Redis
-
-Esto permite manejar picos de solicitudes sin afectar la disponibilidad del sistema.
+- acceso a base de datos
+- configuración de Entity Framework
+- migraciones
 
 ---
 
-# 8. Estrategia de seguridad
+# 5. Infraestructura y Contenedores
 
-El sistema implementa múltiples capas de seguridad:
+El sistema utiliza **Docker Compose** para orquestar los servicios:
 
-- Autenticación con JWT
-- Protección mediante AWS WAF
-- Control de acceso mediante IAM Roles
-- Gestión segura de credenciales con Secrets Manager
-- Validación de entrada para prevenir vulnerabilidades OWASP
+Servicios desplegados:
+
+- frontend
+- backend API
+- PostgreSQL
+
+Esto permite levantar el sistema completo mediante:
+docker compose up --build
 
 ---
 
-# 9. Observabilidad
+# 6. Seguridad
 
-La solución incorpora monitoreo completo mediante:
+El sistema implementa:
 
-- AWS CloudWatch
-- métricas de aplicación
-- trazabilidad de solicitudes
-- alertas operativas
+- Autenticación JWT
+- Protección de endpoints mediante `[Authorize]`
+- Contraseñas almacenadas con **BCrypt**
+- Manejo de secretos mediante variables de entorno
 
-Esto permite detectar problemas de rendimiento o fallas del sistema en tiempo real.
+---
+
+# 7. Escalabilidad
+
+La arquitectura permite escalar:
+
+- frontend independiente
+- backend horizontalmente
+- base de datos gestionada externamente
+
+La separación de capas facilita la evolución del sistema hacia una arquitectura de microservicios en el futuro.
+
+---

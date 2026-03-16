@@ -1,0 +1,10 @@
+bin/
+obj/
+.git/
+.gitignore
+*.md
+!README.md
+.vs/
+.idea/
+**/*.user
+**/*.suo
