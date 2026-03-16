@@ -1,0 +1,29 @@
+name: Provider Optimizer CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore servicios/optimizador-proveedores/ProviderOptimizerService.Tests/ProviderOptimizerService.Tests.csproj
+
+      - name: Build project
+        run: dotnet build servicios/optimizador-proveedores/ProviderOptimizerService.Tests/ProviderOptimizerService.Tests.csproj --no-restore -c Release
+
+      - name: Run tests
+        run: dotnet test servicios/optimizador-proveedores/ProviderOptimizerService.Tests/ProviderOptimizerService.Tests.csproj --no-build -c Release
+
+      - name: Build Docker image
+        run: docker build -t provider-optimizer-service ./servicios/optimizador-proveedores/ProviderOptimizerService

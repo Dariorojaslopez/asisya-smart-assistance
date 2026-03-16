@@ -1,0 +1,6 @@
+@ProviderOptimizerService_HostAddress = http://localhost:5048
+
+GET {{ProviderOptimizerService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
