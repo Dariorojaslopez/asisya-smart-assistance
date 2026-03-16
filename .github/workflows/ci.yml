@@ -40,15 +40,16 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install frontend
+      - name: Install frontend dependencies
         run: |
           cd frontend/provider-ui
           npm install
 
       - name: Build frontend
+        working-directory: frontend/provider-ui
         run: |
-          cd frontend/provider-ui
-          npx vite build
+          npm ci
+          npm run build
       # -----------------------------
       # DOCKER
       # -----------------------------
