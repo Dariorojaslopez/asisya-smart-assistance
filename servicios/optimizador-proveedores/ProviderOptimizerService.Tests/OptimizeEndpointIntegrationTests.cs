@@ -20,7 +20,7 @@ public class OptimizeEndpointIntegrationTests : IClassFixture<WebApplicationFact
     }
 
     [Fact]
-    public async Task PostOptimize_Returns200_And_Provider()
+    public async Task PostOptimize_Returns200_And_Provider_P1_or_P2()
     {
         // Arrange
         var request = new
@@ -41,5 +41,7 @@ public class OptimizeEndpointIntegrationTests : IClassFixture<WebApplicationFact
         Assert.NotNull(provider);
         Assert.NotNull(provider.Id);
         Assert.True(provider.Disponible);
+        // Verify response returns provider P1 or P2 (seeded available providers)
+        Assert.True(provider.Id == "P1" || provider.Id == "P2", $"Expected P1 or P2 but got {provider.Id}");
     }
 }

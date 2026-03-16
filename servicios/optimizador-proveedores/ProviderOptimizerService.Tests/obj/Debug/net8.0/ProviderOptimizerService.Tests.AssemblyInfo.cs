@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProviderOptimizerService.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+231c656c4f26e44263ec95714519346d31640207")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+17599b4d6a6950af4d1f541fa3a191ecd7b4640c")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProviderOptimizerService.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProviderOptimizerService.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

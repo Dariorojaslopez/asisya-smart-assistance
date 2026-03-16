@@ -417,3 +417,8 @@ d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\Provide
 d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Microsoft.AspNetCore.Mvc.Testing.dll
 d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Microsoft.AspNetCore.TestHost.dll
 d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
+d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Npgsql.dll
+d:\Laboratorio\asisya-smart-assistance\servicios\optimizador-proveedores\ProviderOptimizerService.Tests\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll

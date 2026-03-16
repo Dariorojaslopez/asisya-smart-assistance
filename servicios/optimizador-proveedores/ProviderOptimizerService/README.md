@@ -101,7 +101,23 @@ Ejemplo de respuesta 200:
 
 ## Cómo ejecutar la API
 
-1. Tener instalado [.NET 8 SDK](https://dotnet.microsoft.com/download).
+### Opción 1: Con Docker (PostgreSQL + API)
+
+Desde la raíz del proyecto (donde están `Dockerfile` y `docker-compose.yml`):
+
+```bash
+docker compose up --build
+```
+
+- Se levantan dos contenedores: **postgres** (PostgreSQL 15) y **provider_optimizer_api** (.NET 8).
+- La API espera a que PostgreSQL esté listo antes de arrancar y aplica las migraciones EF Core al inicio.
+- **API**: `http://localhost:8080`
+- **Swagger**: `http://localhost:8080/swagger` (disponible porque la API corre en entorno Development).
+- PostgreSQL queda expuesto en el puerto **5432** por si necesitas conectarte con un cliente.
+
+### Opción 2: Local con .NET SDK
+
+1. Tener instalado [.NET 8 SDK](https://dotnet.microsoft.com/download) y PostgreSQL (con la base `provider_optimizer_db` creada).
 2. En la raíz del proyecto (donde está `ProviderOptimizerService.csproj`), ejecutar:
 
 ```bash
@@ -109,6 +125,41 @@ dotnet run
 ```
 
 3. La API quedará disponible (según `launchSettings`) en la URL configurada (por ejemplo `https://localhost:7xxx` o `http://localhost:5xxx`).
-4. **Swagger** está disponible en: **/swagger** (en desarrollo).
+4. **Swagger** está disponible en: **/swagger** (en desarrollo). Con Docker: **http://localhost:8080/swagger**.
 
 Para generar documentación XML en compilación (opcional), habilita `<GenerateDocumentationFile>true</GenerateDocumentationFile>` en el `.csproj`.
+
+---
+
+## Pipeline CI/CD (GitHub Actions)
+
+El proyecto incluye un workflow de integración continua en `.github/workflows/ci.yml` que se ejecuta en cada **push** y en cada **pull request**.
+
+### Pasos del pipeline
+
+| Paso | Descripción |
+|------|-------------|
+| **Trigger** | `on: push` y `on: pull_request` |
+| **Setup .NET 8 SDK** | Instalación del SDK de .NET 8 en el runner (ubuntu-latest). |
+| **Restore dependencies** | `dotnet restore` sobre el proyecto de tests (restaura también la API). |
+| **Build project** | `dotnet build --no-restore -c Release` sobre el proyecto de tests. |
+| **Run tests** | `dotnet test --no-build -c Release` sobre el proyecto de tests. |
+| **Build Docker image** | `docker build -t provider-optimizer-service` con contexto en la carpeta de la API. |
+
+Las rutas usadas son relativas a la raíz del repositorio: `servicios/optimizador-proveedores/ProviderOptimizerService` (API) y `servicios/optimizador-proveedores/ProviderOptimizerService.Tests` (tests).
+
+### Publicar imagen en AWS ECR (opcional)
+
+El workflow incluye en comentarios un **ejemplo de configuración** para subir la imagen Docker a **Amazon ECR**. No es obligatorio ni se usan credenciales reales para que el pipeline pase.
+
+Para activarlo:
+
+1. Descomentar el job `push-ecr` y los pasos en `.github/workflows/ci.yml`.
+2. Configurar en GitHub **Settings → Secrets and variables → Actions** los secretos:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `AWS_REGION` (ej. `us-east-1`)
+   - Opcional: `AWS_ECR_REGISTRY` si el registro tiene otra URL.
+3. Crear en ECR un repositorio llamado `provider-optimizer-service` (o ajustar `ECR_REPOSITORY` en el workflow).
+
+El job opcional suele ejecutarse solo en `push` a `main` y después de que `build-and-test` termine correctamente.

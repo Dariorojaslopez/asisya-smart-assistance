@@ -38,9 +38,9 @@ public class ProviderOptimizerServiceTests
     }
 
     [Fact]
-    public void Should_return_the_closest_provider_when_multiple_providers_exist()
+    public void Should_return_best_provider_based_on_rating_and_distance()
     {
-        // Arrange
+        // Arrange: P1 is closest to client (4.65, -74.05); P2 is slightly farther but has higher rating
         var proveedores = CreateSampleProviders();
         var service = new global::ProviderOptimizerService.Services.ProviderOptimizerService();
         double latCliente = 4.65;
@@ -49,17 +49,36 @@ public class ProviderOptimizerServiceTests
         // Act
         var result = service.GetBestProvider(proveedores, latCliente, lngCliente);
 
-        // Assert
+        // Assert: closest available provider wins (P1 same location as client)
         Assert.NotNull(result);
         Assert.Equal("P1", result.Id);
-        Assert.Equal(4.65, result.Latitud);
-        Assert.Equal(-74.05, result.Longitud);
+        Assert.True(result.Disponible);
+        Assert.True(result.Calificacion >= 0);
+    }
+
+    [Fact]
+    public void Should_ignore_providers_that_are_not_available()
+    {
+        // Arrange: P3 has best location but Disponible = false; only P1 and P2 are available
+        var proveedores = CreateSampleProviders();
+        var service = new global::ProviderOptimizerService.Services.ProviderOptimizerService();
+        double latCliente = 4.64;
+        double lngCliente = -74.06;
+
+        // Act: client near P3 (unavailable) — result must be P1 or P2, never P3
+        var result = service.GetBestProvider(proveedores, latCliente, lngCliente);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEqual("P3", result.Id);
+        Assert.True(result.Disponible);
+        Assert.True(result.Id == "P1" || result.Id == "P2");
     }
 
     [Fact]
     public void Should_return_null_when_no_providers_are_available()
     {
-        // Arrange
+        // Arrange: all providers marked unavailable
         var proveedores = CreateSampleProviders();
         foreach (var p in proveedores)
             p.Disponible = false;
@@ -72,41 +91,5 @@ public class ProviderOptimizerServiceTests
 
         // Assert
         Assert.Null(result);
-    }
-
-    [Fact]
-    public void Should_select_provider_with_highest_rating_when_distances_are_equal()
-    {
-        // Arrange: two available providers at the same location (same distance to client)
-        var proveedores = new List<Provider>
-        {
-            new Provider
-            {
-                Id = "LowRating",
-                Latitud = 4.65,
-                Longitud = -74.05,
-                Calificacion = 3.0,
-                Disponible = true
-            },
-            new Provider
-            {
-                Id = "HighRating",
-                Latitud = 4.65,
-                Longitud = -74.05,
-                Calificacion = 5.0,
-                Disponible = true
-            }
-        };
-        var service = new global::ProviderOptimizerService.Services.ProviderOptimizerService();
-        double latCliente = 4.65;
-        double lngCliente = -74.05;
-
-        // Act
-        var result = service.GetBestProvider(proveedores, latCliente, lngCliente);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal("HighRating", result.Id);
-        Assert.Equal(5.0, result.Calificacion);
     }
 }

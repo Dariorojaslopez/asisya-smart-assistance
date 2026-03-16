@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Lw3eYI+qCk0=",
+  "dgSpecHash": "DxIKEyNAt+o=",
   "success": true,
-  "projectFilePath": "D:\\Laboratorio\\asisya-smart-assistance\\servicios\\optimizador-proveedores\\ProviderOptimizerService\\ProviderOptimizerService.csproj",
+  "projectFilePath": "d:\\Laboratorio\\asisya-smart-assistance\\servicios\\optimizador-proveedores\\ProviderOptimizerService\\ProviderOptimizerService.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\daroj\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\daroj\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.7\\microsoft.aspnetcore.openapi.8.0.7.nupkg.sha512",
