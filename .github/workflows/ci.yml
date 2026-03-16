@@ -1,6 +1,3 @@
-# Pipeline de CI: valida backend, frontend y Docker en cada push y pull_request.
-# No modifica la estructura del repositorio; solo comprueba que todo compila y construye correctamente.
-
 name: CI
 
 on:
@@ -10,42 +7,40 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
     steps:
-      # -------------------------------------------------------------------------
-      # Repositorio
-      # -------------------------------------------------------------------------
+
+      # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # -------------------------------------------------------------------------
-      # Backend (.NET API en servicios/provider-optimizer-api)
-      # -------------------------------------------------------------------------
-      - name: Setup .NET SDK
+      # -----------------------------
+      # BACKEND (.NET)
+      # -----------------------------
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Restore backend dependencies
-        run: dotnet restore servicios/provider-optimizer-api
+      - name: Restore solution
+        run: dotnet restore asisya-smart-assistance.sln
 
-      - name: Build backend
-        run: dotnet build servicios/provider-optimizer-api --no-restore -c Release
+      - name: Build solution
+        run: dotnet build asisya-smart-assistance.sln --no-restore -c Release
 
-      # Ejecuta tests si existe el proyecto ProviderOptimizerService.Tests en la solución.
-      # Si no hay proyectos de prueba, dotnet test suele terminar con éxito (0 tests).
-      - name: Run backend tests
-        run: dotnet test servicios/provider-optimizer-api --no-build -c Release --verbosity normal
+      - name: Run tests
+        run: dotnet test asisya-smart-assistance.sln --no-build -c Release
         continue-on-error: true
 
-      # -------------------------------------------------------------------------
-      # Frontend (Node en frontend/provider-ui)
-      # -------------------------------------------------------------------------
-      - name: Setup Node.js
+      # -----------------------------
+      # FRONTEND
+      # -----------------------------
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install frontend dependencies
+      - name: Install frontend
         run: |
           cd frontend/provider-ui
           npm install
@@ -55,37 +50,8 @@ jobs:
           cd frontend/provider-ui
           npm run build
 
-      # -------------------------------------------------------------------------
-      # Docker (valida que las imágenes se construyan con docker compose)
-      # -------------------------------------------------------------------------
+      # -----------------------------
+      # DOCKER
+      # -----------------------------
       - name: Build Docker images
         run: docker compose build
-
-  # ---------------------------------------------------------------------------
-  # Despliegue opcional a AWS ECR (comentado).
-  # Requiere secrets en GitHub: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION.
-  # Descomentar y configurar los secrets para publicar la imagen en ECR en cada push a main.
-  # ---------------------------------------------------------------------------
-  # push-ecr:
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-test
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v2
-  #     - name: Build and push image
-  #       env:
-  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-  #         ECR_REPOSITORY: provider-optimizer-service
-  #         IMAGE_TAG: ${{ github.sha }}
-  #       run: |
-  #         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./servicios/provider-optimizer-api
-  #         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
